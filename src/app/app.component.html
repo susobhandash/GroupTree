@@ -1,0 +1,70 @@
+<div class="p-10 mb-10 d-flex a-c">
+  <label class="mr-10" [style.width.px]="100">Group By</label>
+  <div class="border grayBg br-5 p-10 w-100" [style.height.px]="40">
+    <span *ngFor="let group of groupBy; let idx = index;" class="pos-rel group-item">
+      {{group.label}}
+      <span *ngIf="idx !== (groupBy.length - 1)" class="fas fa-chevron-right breadcrumb-icon"></span>
+      <span class="fas fa-times remove-icon" (click)="addToGroup(group)"></span>
+    </span>
+  </div>
+  <button class="button ml-10" [style.width.px]="100" (click)="formatByGroup()">
+    Search
+  </button>
+</div>
+<div class="p-10">
+  <div class="header d-flex a-c mb-5 sicky">
+    <span *ngFor="let col of columns" class="column pos-rel" (click)="addToGroup(col)"
+      [ngClass]="{'selected': col.selected}">
+      {{col.label}}
+      <span class="fas fa-times remove-icon" *ngIf="col.selected"></span>
+    </span>
+  </div>
+  <div class="gridRow">
+    <ng-container *ngIf="groupLevel == 0">
+      <div *ngFor="let data of formattedData" class="child-row">
+        <ng-container *ngFor="let col of columns">
+          <span class="column">{{data[col.value]}}</span>
+        </ng-container>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="groupLevel > 0">
+      <ng-template [ngTemplateOutlet]="groupChildTemplate" [ngTemplateOutletContext]="{data: formattedData}">
+      </ng-template>
+    </ng-container>
+  </div>
+</div>
+
+<ng-template #groupChildTemplate let-data="data">
+  <ng-container *ngFor="let fData of data">
+    <div class="border br-5 p-10 mb-10">
+      <ng-container *ngIf="!fData.childExist">
+        <div class="mb-5 p-5 sticky grayBg clickable" (click)="fData.collapsed = !fData.collapsed">
+          <span class="mr-10 fas"
+            [ngClass]="{'fa-chevron-right': fData.collapsed, 'fa-chevron-down': !fData.collapsed}"></span>
+          {{fData.label}} - {{fData.value}}
+        </div>
+        <ng-container *ngIf="!fData.collapsed">
+          <ng-container *ngFor="let dt of fData.data">
+            <div class="child-row">
+              <ng-container *ngFor="let col of columns">
+                <span class="column">{{dt[col.value]}}</span>
+              </ng-container>
+            </div>
+          </ng-container>
+        </ng-container>
+      </ng-container>
+      <ng-container *ngIf="fData.childExist">
+        <div class="mb-5 p-5 sticky grayBg clickable" (click)="fData.collapsed = !fData.collapsed">
+          <span class="mr-10 fas"
+            [ngClass]="{'fa-chevron-right': fData.collapsed, 'fa-chevron-down': !fData.collapsed}"></span>
+          {{fData.label}} - {{fData.value}}
+        </div>
+        <ng-container *ngIf="!fData.collapsed">
+          <ng-template [ngTemplateOutlet]="groupChildTemplate" [ngTemplateOutletContext]="{data: fData.data}">
+          </ng-template>
+        </ng-container>
+      </ng-container>
+    </div>
+  </ng-container>
+</ng-template>
